@@ -1,10 +1,9 @@
-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import locale
 
-# Intentar configurar locale español para parsing fechas en español
+# Configurar locale español para parsear meses en español
 try:
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Linux/Mac
 except:
@@ -16,19 +15,18 @@ except:
 @st.cache_data
 def cargar_datos():
     datos = pd.read_csv("solvera_datos_simulados.csv", parse_dates=["FechaHora"])
-
-    # Corregir coma decimal a punto decimal en columnas numéricas
+    
+    # Reemplazar coma decimal por punto decimal en columnas numéricas
     cols_num = ["Producción Solar_kWh", "Consumo_kWh", "RadiaciónSolar_Wm2", "Temperatura_C"]
     for col in cols_num:
         datos[col] = datos[col].astype(str).str.replace(',', '.').astype(float)
-    
+
     datos["FechaHora"] = pd.to_datetime(datos["FechaHora"], dayfirst=True)
     return datos
 
 @st.cache_data
 def cargar_sugerencias():
     sugerencias = pd.read_csv("solvera_sugerencias.csv")
-    # Convertir fechas literales en español a datetime
     sugerencias["Fecha"] = pd.to_datetime(sugerencias["Fecha"], format="%d de %B de %Y")
     return sugerencias
 
@@ -44,7 +42,7 @@ datos_dia = datos[datos["FechaHora"].dt.date == fecha_seleccionada]
 st.subheader("🔎 Resumen del día")
 prod_total = datos_dia["Producción Solar_kWh"].sum()
 cons_total = datos_dia["Consumo_kWh"].sum()
-ahorro_estimado = round(prod_total * 200, 2)
+ahorro_estimado = round(prod_total * 200, 2)  # suposición: 200 ARS por kWh
 
 col1, col2, col3 = st.columns(3)
 col1.metric("Producción Solar (kWh)", f"{prod_total:.2f}")
